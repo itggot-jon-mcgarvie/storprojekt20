@@ -9,13 +9,18 @@ def set_error(error_message)
     session[:error] = error_message
 end
 
+def connect_to_db(path)
+    db = SQLite3::Database.new(path)
+    db.results_as_hash = true
+    return db
+end
+
 get("/") do
     slim(:start)
 end
 
 post('/register') do
-    db = SQLite3::Database.new("db/tabdatabase.db")
-    db.results_as_hash = true
+    db = connect_to_db("db/tabdatabase.db")
     username = params[:register_username]
     password = params[:register_password]
     
@@ -26,38 +31,56 @@ post('/register') do
         db.execute("INSERT INTO User (username, password) VALUES (?,?)", username, password_digest)
         redirect('/register_confirmation')
     end
-    redirect('/register_confirmation')
-end
-
-get('/register_confirmation') do
-    db = SQLite3::Database.new('db/tabdatabase.db')
-    db.results_as_hash = true
-    result = db.execute("SELECT * FROM User")
-    slim(:register_confirmation, locals:{result:result})
+    redirect('/')
 end
 
 post('/login') do
-    
+    db = connect_to_db('db/tabdatabase.db')
     username = params[:username]
     session[:username] = username
     password = params[:password]
-    db = SQLite3::Database.new("db/database.db")
-    db.results_as_hash = true
     result = db.execute("SELECT user_id,password FROM User WHERE username = ?", username)
     if result.empty?
         set_error("Invalid username or password")
         redirect('/error')
     end
 
-    user_id = result.first["id"]
-    password_digest = result.first["password_digest"]
+    user_id = result.first["user_id"]
+    password_digest = result.first["password"]
     if BCrypt::Password.new(password_digest) == password
         session[:user_id] = user_id
-        redirect('/login_sida')
+        redirect('/home_sida')
     else
         set_error("Invalid username or password")
         redirect('/error')
     end
+end
+
+#kollar om man är inloggad när man antingen refreshar sidan eller byter path
+before do
+    if (session[:user_id] == nil) && (request.path_info != '/') && (request.path_info != '/login')
+        redirect('/')
+    end
+end
+
+get('/home_sida') do
+    slim(:home_sida)
+end
+
+get('/tabs') do
+    #lista alla tabs
+end
+
+get('/create_tab') do
+    #skapa tabs, håll koll på user, sessions?
+end
+
+get('/logout') do
+    #logga ut
+end
+
+get('/settings') do
+    #håll koll på user, delete user, change password
 end
 
 get('/error') do
