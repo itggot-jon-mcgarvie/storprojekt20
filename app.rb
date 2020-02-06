@@ -81,8 +81,15 @@ get('/logout') do
     redirect('/')
 end
 
-get('/settings') do
+get('/settings') do 
+    slim(:settings)
     #håll koll på user, delete user, change password
+end
+
+post('/delete') do
+    db = connect_to_db('db/tabdatabase.db')
+    db.execute("DELETE * FROM User WHERE user_id = ?", session[:user_id])
+    redirect('/')
 end
 
 get('/error') do
