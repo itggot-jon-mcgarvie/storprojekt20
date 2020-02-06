@@ -76,7 +76,9 @@ get('/create_tab') do
 end
 
 get('/logout') do
-    #logga ut
+    session[:user_id] = nil
+    session[:username] = nil
+    redirect('/')
 end
 
 get('/settings') do
