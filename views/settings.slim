@@ -1,5 +1,13 @@
 p Settings for #{session[:username]}
 
-a href="/delete" Delete your account
+form action="/delete" method="post"
+    input type="submit" value="Delete your account"
 br
-a href="/update_password" Change your password
+
+form action="/update" method="post"
+    p Change your password
+    input type="text" name="old" placeholder="Your old password"
+    br
+    input type="text" name="new" placeholder="Your new password"
+    br
+    input type="submit" value="Submit"

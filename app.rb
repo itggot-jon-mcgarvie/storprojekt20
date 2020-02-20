@@ -2,6 +2,7 @@ require "SQLite3"
 require "slim"
 require "sinatra"
 require "bcrypt"
+require_relative "model.rb"
 
 enable :sessions
 
@@ -57,11 +58,11 @@ post('/login') do
 end
 
 #kollar om man är inloggad när man antingen refreshar sidan eller byter path
-before do
-    if (session[:user_id] == nil) && (request.path_info != '/') && (request.path_info != '/login')
-        redirect('/')
-    end
-end
+# after('/login') do
+#     if (session[:user_id] == nil) && (request.path_info != '/')
+#         redirect('/logout')
+#     end
+# end
 
 get('/home_sida') do
     slim(:home_sida)
@@ -88,8 +89,13 @@ end
 
 post('/delete') do
     db = connect_to_db('db/tabdatabase.db')
-    db.execute("DELETE * FROM User WHERE user_id = ?", session[:user_id])
-    redirect('/')
+    db.execute("DELETE FROM User WHERE user_id = ?", session[:user_id])
+    redirect('/logout')
+end
+
+post('/update') do
+    db = connect_to_db('db/tabdatabase.db')
+    password = params[  ]
 end
 
 get('/error') do
