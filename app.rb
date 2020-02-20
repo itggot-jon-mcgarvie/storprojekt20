@@ -99,7 +99,9 @@ post('/update') do
     compare_password = db.execute("SELECT password FROM User WHERE user_id = ?", session[:user_id])
     new_password = params[:new]
     if BCrypt::Password.new(old_password) == compare_password
-        db.execute("UPDATE password ")
+        db.execute("UPDATE User SET password=? WHERE user_id=?",new_password,user_id)
+    end
+    redirect('/settings')
 end
 
 get('/error') do
