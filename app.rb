@@ -95,7 +95,11 @@ end
 
 post('/update') do
     db = connect_to_db('db/tabdatabase.db')
-    password = params[  ]
+    old_password = params[:old]
+    compare_password = db.execute("SELECT password FROM User WHERE user_id = ?", session[:user_id])
+    new_password = params[:new]
+    if BCrypt::Password.new(old_password) == compare_password
+        db.execute("UPDATE password ")
 end
 
 get('/error') do
