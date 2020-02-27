@@ -2,6 +2,7 @@ require "SQLite3"
 require "slim"
 require "sinatra"
 require "bcrypt"
+require "byebug"
 require_relative "model.rb"
 
 enable :sessions
@@ -30,7 +31,7 @@ post('/register') do
     if result.empty?
         password_digest = BCrypt::Password.create(password)
         db.execute("INSERT INTO User (username, password) VALUES (?,?)", username, password_digest)
-        redirect('/register_confirmation')
+        redirect('/')
     end
     redirect('/')
 end
@@ -97,10 +98,11 @@ post('/update') do
     db = connect_to_db('db/tabdatabase.db')
     old_password = params[:old]
     compare_password = db.execute("SELECT password FROM User WHERE user_id = ?", session[:user_id])
-    new_password = params[:new]
-    if BCrypt::Password.new(old_password) == compare_password
-        db.execute("UPDATE User SET password=? WHERE user_id=?",new_password,user_id)
+    new_password = BCrypt::Password.create(params[:new])
+    if BCrypt::Password.new(compare_password.first["password"]) == old_password
+        db.execute("UPDATE User SET password=? WHERE user_id=?",new_password,session[:user_id])
     end
+    
     redirect('/settings')
 end
 
