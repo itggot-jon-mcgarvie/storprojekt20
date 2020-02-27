@@ -1,0 +1,6 @@
+- if result != nil
+    ul
+        - result.each do |item|
+            .row
+                li = item["title"]
+                a href="/show_tab/#{item['tab_id']}"

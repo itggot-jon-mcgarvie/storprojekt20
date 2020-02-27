@@ -70,11 +70,37 @@ get('/home_sida') do
 end
 
 get('/tabs') do
-    #lista alla tabs
+    #lista länkar till alla tabs
+    db = connect_to_db('db/tabdatabase.db')
+    result = db.execute("SELECT * FROM Tab")
+    slim(:show_tab_links, locals:{result:result})
+end
+
+get('/show_tab/:id') do
+    db = connect_to_db('db/tabdatabase.db')
+    # title = db.execute("SELECT title FROM Tab WHERE tab_id = ?", :id)
+    # content = db.execute("SELECT content FROM Tab WHERE tab_id = ?", :id)
+    # artist = db.execute("SELECT artist FROM Tab WHERE tab_id = ?", :id)
+    result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", :id)
+    slim(:show_tab, locals:{result:result})
 end
 
 get('/create_tab') do
     #skapa tabs, håll koll på user, sessions?
+    #tab_id, content, title, artist, created_on, created_by
+    slim(:create_tab)
+end
+
+post('/register_tab') do
+    db = connect_to_db('db/tabdatabase.db')
+    content = params[:content]
+    title = params[:title]
+    artist = params[:artist]
+    time = Time.now
+    created_on = time.inspect
+    created_by = session[:user_id]
+    db.execute("INSERT INTO Tab (content, title, artist, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist, created_on, created_by)
+    redirect('/home_sida')
 end
 
 get('/logout') do
