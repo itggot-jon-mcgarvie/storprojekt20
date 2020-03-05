@@ -1,5 +1,8 @@
-h1 result["title"]
-h2 result["artist"]
-p reuslt["content"]
-
-// Vet inte om det funkar
+- if result != nil
+    - result.each do |item|
+        .row
+            h1 = item["title"]
+            p = item["created_by"]
+            p = item["created_on"]
+            h2 = item["artist_id"]
+            p = item["content"]

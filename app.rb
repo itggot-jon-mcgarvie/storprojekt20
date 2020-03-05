@@ -26,14 +26,16 @@ post('/register') do
     username = params[:register_username]
     password = params[:register_password]
     
-    result = db.execute("SELECT user_id FROM User WHERE username = ?", username)
-
+    result = db.execute("SELECT * FROM User WHERE username = ?", username)
+    
     if result.empty?
         password_digest = BCrypt::Password.create(password)
         db.execute("INSERT INTO User (username, password) VALUES (?,?)", username, password_digest)
         redirect('/')
+    else
+        set_error("That username is already in use")
+        redirect('/error')
     end
-    redirect('/')
 end
 
 post('/login') do
@@ -78,10 +80,9 @@ end
 
 get('/show_tab/:id') do
     db = connect_to_db('db/tabdatabase.db')
-    # title = db.execute("SELECT title FROM Tab WHERE tab_id = ?", :id)
-    # content = db.execute("SELECT content FROM Tab WHERE tab_id = ?", :id)
-    # artist = db.execute("SELECT artist FROM Tab WHERE tab_id = ?", :id)
-    result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", :id)
+    id = params[:id]
+    result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", id)
+    # user = db.execute("SELECT ") Många till många relation mellan tab och user fråga Emil
     slim(:show_tab, locals:{result:result})
 end
 
@@ -99,7 +100,7 @@ post('/register_tab') do
     time = Time.now
     created_on = time.inspect
     created_by = session[:user_id]
-    db.execute("INSERT INTO Tab (content, title, artist, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist, created_on, created_by)
+    db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist, created_on, created_by)
     redirect('/home_sida')
 end
 
