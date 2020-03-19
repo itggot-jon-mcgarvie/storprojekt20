@@ -7,16 +7,6 @@ require_relative "model.rb"
 
 enable :sessions
 
-def set_error(error_message)
-    session[:error] = error_message
-end
-
-def connect_to_db(path)
-    db = SQLite3::Database.new(path)
-    db.results_as_hash = true
-    return db
-end
-
 get("/") do
     slim(:start)
 end
@@ -48,7 +38,7 @@ post('/login') do
         set_error("Invalid username or password")
         redirect('/error')
     end
-
+# cooldown
     user_id = result.first["user_id"]
     password_digest = result.first["password"]
     if BCrypt::Password.new(password_digest) == password
