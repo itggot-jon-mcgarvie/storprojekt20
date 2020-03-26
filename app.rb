@@ -8,7 +8,7 @@ require_relative "model.rb"
 enable :sessions
 
 get("/") do
-    slim(:start)
+    slim(:"login/start")
 end
 
 post('/register') do
@@ -41,13 +41,26 @@ post('/login') do
 # cooldown
     user_id = result.first["user_id"]
     password_digest = result.first["password"]
-    if BCrypt::Password.new(password_digest) == password
-        session[:user_id] = user_id
-        redirect('/home_sida')
-    else
-        set_error("Invalid username or password")
-        redirect('/error')
+    t = Time.now
+    t2 = t + 10*60
+    if Time.now == t2
+        session[:login_allowed] = true
+        
     end
+    
+    if cooldown < 50 && session[:login_allowed] = true
+        if BCrypt::Password.new(password_digest) == password
+            session[:user_id] = user_id
+            redirect('/home_sida')
+        else
+            set_error("Invalid username or password")
+            redirect('/error')
+            cooldown++
+        end
+    else
+        session[:login_allowed] = false
+    end
+    
 end
 
 #kollar om man är inloggad när man antingen refreshar sidan eller byter path
@@ -58,14 +71,14 @@ end
 # end
 
 get('/home_sida') do
-    slim(:home_sida)
+    slim(:"tabs/home_sida")
 end
 
 get('/tabs') do
     #lista länkar till alla tabs
     db = connect_to_db('db/tabdatabase.db')
     result = db.execute("SELECT * FROM Tab")
-    slim(:show_tab_links, locals:{result:result})
+    slim(:"tabs/show_tab_links", locals:{result:result})
 end
 
 get('/show_tab/:id') do
@@ -73,13 +86,13 @@ get('/show_tab/:id') do
     id = params[:id]
     result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", id)
     # user = db.execute("SELECT ") Många till många relation mellan tab och user fråga Emil
-    slim(:show_tab, locals:{result:result})
+    slim(:"tabs/show_tab", locals:{result:result})
 end
 
 get('/create_tab') do
     #skapa tabs, håll koll på user, sessions?
     #tab_id, content, title, artist, created_on, created_by
-    slim(:create_tab)
+    slim(:"tabs/create_tab")
 end
 
 post('/register_tab') do
