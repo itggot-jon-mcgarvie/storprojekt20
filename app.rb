@@ -48,18 +48,18 @@ post('/login') do
         
     end
     
-    if cooldown < 50 && session[:login_allowed] = true
+    # if cooldown < 50 && session[:login_allowed] = true
         if BCrypt::Password.new(password_digest) == password
             session[:user_id] = user_id
             redirect('/home_sida')
         else
             set_error("Invalid username or password")
             redirect('/error')
-            cooldown++
+            # cooldown++
         end
-    else
-        session[:login_allowed] = false
-    end
+    # else
+    #     session[:login_allowed] = false
+    # end
     
 end
 
@@ -77,15 +77,18 @@ end
 get('/tabs') do
     #lista länkar till alla tabs
     db = connect_to_db('db/tabdatabase.db')
-    result = db.execute("SELECT * FROM Tab")
-    slim(:"tabs/show_tab_links", locals:{result:result})
+    result_user = db.execute("SELECT * FROM Tab WHERE created_by = ?", session[:username])
+    result_all = db.execute("SELECT * FROM Tab")
+    slim(:"tabs/show_tab_links", locals:{result:result_all, user:result_user})
 end
 
 get('/show_tab/:id') do
     db = connect_to_db('db/tabdatabase.db')
     id = params[:id]
     result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", id)
-    # user = db.execute("SELECT ") Många till många relation mellan tab och user fråga Emil
+    user_id = db.execute("SELECT created_by FROM Tab WHERE tab_id = ?", id)
+    # p user_id
+    # user = db.execute("SELECT username FROM User WHERE user_id = ?", user_id)
     slim(:"tabs/show_tab", locals:{result:result})
 end
 
@@ -102,7 +105,7 @@ post('/register_tab') do
     artist = params[:artist]
     time = Time.now
     created_on = time.inspect
-    created_by = session[:user_id]
+    created_by = session[:username]
     db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist, created_on, created_by)
     redirect('/home_sida')
 end

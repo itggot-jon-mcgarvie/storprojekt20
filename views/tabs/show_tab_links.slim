@@ -1,3 +1,14 @@
+p Your tabs
+- if user != nil
+    ul
+        -user.each do |element|
+            .row
+                li = element["title"]
+                a href="/show_tab/#{element['tab_id']}" Show tab
+- else
+    p You haven't created any tabs
+    
+p All tabs
 - if result != nil
     ul
         - result.each do |item|

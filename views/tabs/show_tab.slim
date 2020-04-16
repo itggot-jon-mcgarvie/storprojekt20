@@ -2,7 +2,7 @@
     - result.each do |item|
         .row
             h1 = item["title"]
-            p = item["created_by"]
-            p = item["created_on"]
-            h2 = item["artist_id"]
+            p Created by #{item["created_by"]}
+            p Created on #{item["created_on"]}
+            h2 Artist #{item["artist_id"]}
             p = item["content"]
