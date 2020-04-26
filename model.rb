@@ -7,3 +7,14 @@ def connect_to_db(path)
     db.results_as_hash = true
     return db
 end
+
+def cooldown()
+    # i dont know
+end
+
+#kollar om man är inloggad när man antingen refreshar sidan eller byter path
+def check_logged_in()
+    if session[:user_id] == nil
+        slim(:"login/start")
+    end
+end

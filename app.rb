@@ -8,7 +8,8 @@ require_relative "model.rb"
 enable :sessions
 
 get("/") do
-    slim(:"login/start")
+    check_logged_in()
+    slim(:home_sida)
 end
 
 post('/register') do
@@ -51,7 +52,7 @@ post('/login') do
     # if cooldown < 50 && session[:login_allowed] = true
         if BCrypt::Password.new(password_digest) == password
             session[:user_id] = user_id
-            redirect('/home_sida')
+            redirect('/')
         else
             set_error("Invalid username or password")
             redirect('/error')
@@ -63,21 +64,14 @@ post('/login') do
     
 end
 
-#kollar om man är inloggad när man antingen refreshar sidan eller byter path
-# after('/login') do
-#     if (session[:user_id] == nil) && (request.path_info != '/')
-#         redirect('/logout')
-#     end
-# end
-
-get('/home_sida') do
-    slim(:"tabs/home_sida")
-end
-
 get('/tabs') do
     #lista länkar till alla tabs
     db = connect_to_db('db/tabdatabase.db')
-    result_user = db.execute("SELECT * FROM Tab WHERE created_by = ?", session[:username])
+    if session[:user_id] != nil
+        result_user = db.execute("SELECT * FROM Tab WHERE created_by = ?", session[:username])
+    else
+        result_user = "Log in to see your tabs"
+    end
     result_all = db.execute("SELECT * FROM Tab")
     slim(:"tabs/show_tab_links", locals:{result:result_all, user:result_user})
 end
@@ -107,7 +101,7 @@ post('/register_tab') do
     created_on = time.inspect
     created_by = session[:username]
     db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist, created_on, created_by)
-    redirect('/home_sida')
+    redirect('/')
 end
 
 get('/logout') do

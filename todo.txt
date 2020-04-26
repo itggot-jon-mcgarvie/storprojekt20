@@ -1,0 +1,8 @@
+- Finns skillnad på vad man kan göra som inloggad eller ej
+- Yardoc
+- MVC
+- REST
+- CRUD
+- Behörighetssystem
+- Många till många förhållande
+- Cooldown funktion
