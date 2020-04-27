@@ -1,11 +1,12 @@
 p Your tabs
-- if user != nil
+- if user != nil && user != user.to_s
     ul
         -user.each do |element|
             .row
                 li = element["title"]
                 a href="/show_tab/#{element['tab_id']}" Show tab
-
+- elsif user == user.to_s
+    p = user
     
 p All tabs
 - if result != nil

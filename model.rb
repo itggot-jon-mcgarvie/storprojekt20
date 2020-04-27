@@ -13,8 +13,10 @@ def cooldown()
 end
 
 #kollar om man är inloggad när man antingen refreshar sidan eller byter path
-def check_logged_in()
+def check_logged_in(path)
     if session[:user_id] == nil
         slim(:"login/start")
+    else
+        slim(path)
     end
 end

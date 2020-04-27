@@ -8,8 +8,7 @@ require_relative "model.rb"
 enable :sessions
 
 get("/") do
-    check_logged_in()
-    slim(:home_sida)
+    check_logged_in(:home_sida)
 end
 
 post('/register') do
@@ -87,9 +86,9 @@ get('/show_tab/:id') do
 end
 
 get('/create_tab') do
+    check_logged_in(:"tabs/create_tab")
     #skapa tabs, håll koll på user, sessions?
     #tab_id, content, title, artist, created_on, created_by
-    slim(:"tabs/create_tab")
 end
 
 post('/register_tab') do
@@ -111,7 +110,7 @@ get('/logout') do
 end
 
 get('/settings') do 
-    slim(:settings)
+    check_logged_in(:settings)
     #håll koll på user, delete user, change password
 end
 
