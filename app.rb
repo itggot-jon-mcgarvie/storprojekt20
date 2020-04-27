@@ -100,6 +100,7 @@ post('/register_tab') do
     created_on = time.inspect
     created_by = session[:username]
     db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist, created_on, created_by)
+    # redirecta till taben som skapades
     redirect('/')
 end
 

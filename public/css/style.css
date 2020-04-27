@@ -1,11 +1,9 @@
-/* .logo {
-
+.logo {
+    text-decoration:none; 
+    color:black; 
+    font-size:30px;
 }
-
+/* 
 .links {
 
 } */
-
-body {
-    padding: 0;
-}
