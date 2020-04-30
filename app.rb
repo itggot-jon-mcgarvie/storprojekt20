@@ -98,9 +98,13 @@ post('/register_tab') do
     artist = params[:artist]
     time = Time.now
     created_on = time.inspect
-    created_by = session[:username]
-    db.execute("SELECT artist_id ")
-    db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist, created_on, created_by)
+    created_by = session[:user_id]
+    artist_id = db.execute("SELECT artist_id FROM Artist WHERE name = ?", artist)
+    if artist_id == nil
+        db.execute("INSERT INTO Artist name VALUES ?", artist)
+        artist_id = db.execute("SELECT artist_id FROM Artist WHERE name = ?", artist)
+    end
+    db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist_id, created_on, created_by)
     # redirecta till taben som skapades
     redirect('/')
 end
