@@ -77,7 +77,9 @@ end
 
 get('/show_tab/:id') do
     db = connect_to_db('db/tabdatabase.db')
-    id = params[:id]
+    id = params[:id].to_i
+    artist = db.execute("SELECT Artist.name FROM tab_artist_relation INNER JOIN Artist ON tab_artist_relation.artist_id = Artist.artist_id WHERE tab_id = ?", id)
+    byebug
     result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", id)
     user_id = db.execute("SELECT created_by FROM Tab WHERE tab_id = ?", id)
     # p user_id
@@ -100,10 +102,11 @@ post('/register_tab') do
     created_on = time.inspect
     created_by = session[:user_id]
     artist_id = db.execute("SELECT artist_id FROM Artist WHERE name = ?", artist)
-    if artist_id == nil
-        db.execute("INSERT INTO Artist name VALUES ?", artist)
+    if artist_id.empty?
+        db.execute("INSERT INTO Artist (name) VALUES (?)", artist)
         artist_id = db.execute("SELECT artist_id FROM Artist WHERE name = ?", artist)
     end
+    artist_id = (artist_id.first)["artist_id"]
     db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist_id, created_on, created_by)
     # redirecta till taben som skapades
     redirect('/')
