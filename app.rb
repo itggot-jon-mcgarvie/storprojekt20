@@ -67,11 +67,11 @@ get('/tabs') do
     #lista länkar till alla tabs
     db = connect_to_db('db/tabdatabase.db')
     if session[:user_id] != nil
-        result_user =  get_tabs_for_user(session[:user_id])
+        result_user =  get_tabs_for_user(db, session[:user_id])
     else
         result_user = "Log in to see your tabs"
     end
-    result_all = get_all_tabs()
+    result_all = get_all_tabs(db)
     slim(:"tabs/show_tab_links", locals:{result:result_all, user:result_user})
 end
 
@@ -107,6 +107,8 @@ post('/register_tab') do
     end
     artist_id = (artist_id.first)["artist_id"]
     db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist_id, created_on, created_by)
+    # byebug
+    # db.execute("INSERT INTO tab_artist_relation (tab_id, artist_id) SELECT (tab_id, artist_id) FROM Tab WHERE tab_id = ")
     # redirecta till taben som skapades
     redirect('/')
 end

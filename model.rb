@@ -29,11 +29,11 @@ def get_user(db, username)
     db.execute("SELECT * FROM User WHERE username = ?", username)
 end
 
-def get_tabs_for_user(id)
+def get_tabs_for_user(db, id)
     db.execute("SELECT * FROM Tab WHERE created_by = ?", id)
 end
 
-def get_all_tabs()
+def get_all_tabs(db)
     db.execute("SELECT * FROM Tab")
 end
 
