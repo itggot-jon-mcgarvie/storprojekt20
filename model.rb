@@ -20,3 +20,36 @@ def check_logged_in(path)
         slim(path)
     end
 end
+
+def register_user(db, username, password_digest)
+    db.execute("INSERT INTO User (username, password) VALUES (?,?)", username, password_digest)
+end
+
+def get_user(db, username)
+    db.execute("SELECT * FROM User WHERE username = ?", username)
+end
+
+def get_tabs_for_user(id)
+    db.execute("SELECT * FROM Tab WHERE created_by = ?", id)
+end
+
+def get_all_tabs()
+    db.execute("SELECT * FROM Tab")
+end
+
+def new_post()
+
+end
+
+def edit_post()
+
+end
+
+def get_a_post()
+
+end
+
+def delete_post()
+
+end
+#ta bort sessions ur denna

@@ -16,11 +16,11 @@ post('/register') do
     username = params[:register_username]
     password = params[:register_password]
     
-    result = db.execute("SELECT * FROM User WHERE username = ?", username)
+    result = get_user(db, username)
     
     if result.empty?
         password_digest = BCrypt::Password.create(password)
-        db.execute("INSERT INTO User (username, password) VALUES (?,?)", username, password_digest)
+        register_user(db, username, password_digest)
         redirect('/')
     else
         set_error("That username is already in use")
@@ -33,7 +33,7 @@ post('/login') do
     username = params[:username]
     session[:username] = username
     password = params[:password]
-    result = db.execute("SELECT user_id,password FROM User WHERE username = ?", username)
+    result = get_user(db, username)
     if result.empty?
         set_error("Invalid username or password")
         redirect('/error')
@@ -67,11 +67,11 @@ get('/tabs') do
     #lista länkar till alla tabs
     db = connect_to_db('db/tabdatabase.db')
     if session[:user_id] != nil
-        result_user = db.execute("SELECT * FROM Tab WHERE created_by = ?", session[:username])
+        result_user =  get_tabs_for_user(session[:user_id])
     else
         result_user = "Log in to see your tabs"
     end
-    result_all = db.execute("SELECT * FROM Tab")
+    result_all = get_all_tabs()
     slim(:"tabs/show_tab_links", locals:{result:result_all, user:result_user})
 end
 
@@ -79,7 +79,6 @@ get('/show_tab/:id') do
     db = connect_to_db('db/tabdatabase.db')
     id = params[:id].to_i
     artist = db.execute("SELECT Artist.name FROM tab_artist_relation INNER JOIN Artist ON tab_artist_relation.artist_id = Artist.artist_id WHERE tab_id = ?", id)
-    byebug
     result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", id)
     user_id = db.execute("SELECT created_by FROM Tab WHERE tab_id = ?", id)
     # p user_id
