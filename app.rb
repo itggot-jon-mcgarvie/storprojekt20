@@ -107,8 +107,8 @@ post('/register_tab') do
     end
     artist_id = (artist_id.first)["artist_id"]
     db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist_id, created_on, created_by)
-    # byebug
-    # db.execute("INSERT INTO tab_artist_relation (tab_id, artist_id) SELECT (tab_id, artist_id) FROM Tab WHERE tab_id = ")
+    tab_id = db.execute("SELECT MAX(tab_id) FROM Tab")
+    db.execute("INSERT INTO tab_artist_relation SELECT tab_id,artist_id FROM Tab WHERE (tab_id = ? AND artist_id = ?)", tab_id, artist_id)
     # redirecta till taben som skapades
     redirect('/')
 end
