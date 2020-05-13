@@ -80,9 +80,11 @@ get('/show_tab/:id') do
     id = params[:id].to_i
     artist = db.execute("SELECT Artist.name FROM tab_artist_relation INNER JOIN Artist ON tab_artist_relation.artist_id = Artist.artist_id WHERE tab_id = ?", id)
     result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", id)
+    user_id = db.execute("SELECT created_by FROM Tab WHERE tab_id = ?", id)
+    user = db.execute("SELECT username FROM User WHERE user_id=?", user_id.first[0])
     # p user_id
     # user = db.execute("SELECT username FROM User WHERE user_id = ?", user_id)
-    slim(:"tabs/show_tab", locals:{result:result, artist:artist})
+    slim(:"tabs/show_tab", locals:{result:result, artist:artist, user:user})
 end
 
 get('/create_tab') do
@@ -106,8 +108,8 @@ post('/register_tab') do
     end
     artist_id = (artist_id.first)["artist_id"]
     db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist_id, created_on, created_by)
-    tab_id = db.execute("SELECT MAX(tab_id) FROM Tab")
-    db.execute("INSERT INTO tab_artist_relation (tab_id, artist_id) VALUES (?,?)", tab_id, artist_id)
+    tab_id = db.execute("SELECT MAX(tab_id) AS this_tab FROM Tab")
+    db.execute("INSERT INTO tab_artist_relation (tab_id, artist_id) VALUES (?,?)", tab_id.first["this_tab"], artist_id)
     # redirecta till taben som skapades
     redirect('/')
 end
