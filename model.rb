@@ -37,19 +37,21 @@ def get_all_tabs(db)
     db.execute("SELECT * FROM Tab")
 end
 
-def new_post()
-
+def get_artist(db, id)
+    artist = db.execute("SELECT Artist.name FROM tab_artist_relation INNER JOIN Artist ON tab_artist_relation.artist_id = Artist.artist_id WHERE tab_id = ?", id)
 end
 
-def edit_post()
-
+def get_a_tab(db, id)
+    result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", id)
 end
 
-def get_a_post()
-
+def get_username(db, id)
+    user_id = db.execute("SELECT created_by FROM Tab WHERE tab_id = ?", id)
+    user = db.execute("SELECT username FROM User WHERE user_id=?", user_id.first[0])
 end
 
-def delete_post()
-
+def delete_tab(db, id)
+    db.execute("DELETE FROM Tab WHERE tab_id = ?", id)
+    db.execute("DELETE FROM tab_artist_relation WHERE tab_id = ?", id)
 end
 #ta bort sessions ur denna

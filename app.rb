@@ -72,23 +72,35 @@ get('/tabs') do
         result_user = "Log in to see your tabs"
     end
     result_all = get_all_tabs(db)
-    slim(:"tabs/show_tab_links", locals:{result:result_all, user:result_user})
+    slim(:"tabs/index", locals:{result:result_all, user:result_user})
 end
 
-get('/show_tab/:id') do
+get('/tabs/:id') do
     db = connect_to_db('db/tabdatabase.db')
     id = params[:id].to_i
-    artist = db.execute("SELECT Artist.name FROM tab_artist_relation INNER JOIN Artist ON tab_artist_relation.artist_id = Artist.artist_id WHERE tab_id = ?", id)
-    result = db.execute("SELECT * FROM Tab WHERE tab_id = ?", id)
-    user_id = db.execute("SELECT created_by FROM Tab WHERE tab_id = ?", id)
-    user = db.execute("SELECT username FROM User WHERE user_id=?", user_id.first[0])
+    artist = get_artist(db, id)
+    result = get_a_tab(db, id)
+    user = get_username(db, id)
     # p user_id
     # user = db.execute("SELECT username FROM User WHERE user_id = ?", user_id)
-    slim(:"tabs/show_tab", locals:{result:result, artist:artist, user:user})
+    slim(:"tabs/show", locals:{result:result, artist:artist, user:user})
+end
+
+get('/tabs/:id/edit') do
+    db = connect_to_db('db/tabdatabase.db')
+    
+    slim(:"tabs/edit", locals:{})
+end
+
+get('/tabs/:id/delete') do
+    db = connect_to_db('db/tabdatabase.db')
+    id = params[:id].to_i
+    delete_tab(db, id)
+    redirect('/tabs')
 end
 
 get('/create_tab') do
-    check_logged_in(:"tabs/create_tab")
+    check_logged_in(:"tabs/create")
     #skapa tabs, håll koll på user, sessions?
     #tab_id, content, title, artist, created_on, created_by
 end
@@ -121,7 +133,7 @@ get('/logout') do
 end
 
 get('/settings') do 
-    check_logged_in(:settings)
+    check_logged_in(:"login/settings")
     #håll koll på user, delete user, change password
 end
 
