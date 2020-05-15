@@ -7,12 +7,19 @@ require_relative "model.rb"
 
 enable :sessions
 
+# Display landing page
+#
+# @see Model#check_logged_in
 get("/") do
-    check_logged_in(:home_sida)
+    if check_logged_in(session[:user_id]) == true
+        slim(:home_sida)
+    else
+        slim(:"login/start")
+    end
 end
 
+# Register
 post('/register') do
-    
     username = params[:register_username]
     password = params[:register_password]
     
@@ -77,8 +84,17 @@ get('/tabs/:id') do
     id = params[:id].to_i
     artist = get_artist(id)
     result = get_a_tab(id)
-    user = get_username(id)
-    slim(:"tabs/show", locals:{result:result, artist:artist, user:user})
+    user_result = get_username(id)
+    user = user_result["user"]
+    user_id = user_result["user_id"].first[0].to_i
+    p user_id
+    if session[:user_id] == user_id
+        showEditDelete = true
+    else
+        showEditDelete = false
+    end
+    p showEditDelete
+    slim(:"tabs/show", locals:{result:result, artist:artist, user:user, showEditDelete:showEditDelete})
 end
 
 get('/tabs/:id/edit') do
@@ -101,7 +117,11 @@ get('/tabs/:id/delete') do
 end
 
 get('/create_tab') do
-    check_logged_in(:"tabs/create")
+    if check_logged_in(session[:user_id]) == true
+        slim(:"tabs/create")
+    else
+        slim(:"login/start")
+    end
     #skapa tabs, håll koll på user, sessions?
     #tab_id, content, title, artist, created_on, created_by
 end
@@ -126,7 +146,11 @@ get('/logout') do
 end
 
 get('/settings') do 
-    check_logged_in(:"login/settings")
+    if check_logged_in(session[:user_id]) == true
+        slim(:"login/settings")
+    else
+        slim(:"login/start")
+    end
     #håll koll på user, delete user, change password
 end
 

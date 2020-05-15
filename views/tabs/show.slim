@@ -6,8 +6,10 @@
             p Created on #{item["created_on"]}
             h2 Artist: #{artist.first[0]}
             p = item["content"]
-a href="/tabs/#{params['id']}/edit" style="color:black; text-decoration: none; border: black 1px solid;" Edit your tab 
-/ Fixa så att bara skaparen kan ändra
-br
-br
-a href="/tabs/#{params['id']}/delete" style="color:black; text-decoration: none; border: black 1px solid;" Delete tab
+            
+- if showEditDelete == true
+    a href="/tabs/#{params['id']}/edit" style="color:black; text-decoration: none; border: black 1px solid;" Edit your tab 
+    br
+    br
+    a href="/tabs/#{params['id']}/delete" style="color:black; text-decoration: none; border: black 1px solid;" Delete tab
+- p showEditDelete
