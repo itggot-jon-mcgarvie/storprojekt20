@@ -45,6 +45,10 @@ end
 # @param [Integer] id, The users id
 def delete_user(id)
     db = set_db()
+    result = db.execute("SELECT tab_id FROM Tab WHERE created_by = ?", id)
+    result.each do |item|
+        delete_tab(item["tab_id"].to_i)
+    end
     db.execute("DELETE FROM User WHERE user_id = ?", id)
 end
 
