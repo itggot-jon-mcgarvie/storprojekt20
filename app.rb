@@ -12,15 +12,15 @@ get("/") do
 end
 
 post('/register') do
-    db = connect_to_db("db/tabdatabase.db")
+    
     username = params[:register_username]
     password = params[:register_password]
     
-    result = get_user(db, username)
+    result = get_user(username)
     
     if result.empty?
         password_digest = BCrypt::Password.create(password)
-        register_user(db, username, password_digest)
+        register_user(username, password_digest)
         redirect('/')
     else
         set_error("That username is already in use")
@@ -29,11 +29,10 @@ post('/register') do
 end
 
 post('/login') do
-    db = connect_to_db('db/tabdatabase.db')
     username = params[:username]
     session[:username] = username
     password = params[:password]
-    result = get_user(db, username)
+    result = get_user(username)
     if result.empty?
         set_error("Invalid username or password")
         redirect('/error')
@@ -65,37 +64,39 @@ end
 
 get('/tabs') do
     #lista länkar till alla tabs
-    db = connect_to_db('db/tabdatabase.db')
     if session[:user_id] != nil
-        result_user =  get_tabs_for_user(db, session[:user_id])
+        result_user =  get_tabs_for_user(session[:user_id])
     else
         result_user = "Log in to see your tabs"
     end
-    result_all = get_all_tabs(db)
+    result_all = get_all_tabs()
     slim(:"tabs/index", locals:{result:result_all, user:result_user})
 end
 
 get('/tabs/:id') do
-    db = connect_to_db('db/tabdatabase.db')
     id = params[:id].to_i
-    artist = get_artist(db, id)
-    result = get_a_tab(db, id)
-    user = get_username(db, id)
-    # p user_id
-    # user = db.execute("SELECT username FROM User WHERE user_id = ?", user_id)
+    artist = get_artist(id)
+    result = get_a_tab(id)
+    user = get_username(id)
     slim(:"tabs/show", locals:{result:result, artist:artist, user:user})
 end
 
 get('/tabs/:id/edit') do
-    db = connect_to_db('db/tabdatabase.db')
-    
-    slim(:"tabs/edit", locals:{})
+    result = get_a_tab(params[:id].to_i)
+    slim(:"tabs/edit", locals:{result:result.first})
+end
+
+post('/tabs/:id/edited') do
+    new_title = params[:title]
+    new_content = params[:content]
+    id = params[:id]
+    update_tab(new_title, new_content, id)
+    redirect('/tabs/'+ id)
 end
 
 get('/tabs/:id/delete') do
-    db = connect_to_db('db/tabdatabase.db')
     id = params[:id].to_i
-    delete_tab(db, id)
+    delete_tab(id)
     redirect('/tabs')
 end
 
@@ -106,24 +107,16 @@ get('/create_tab') do
 end
 
 post('/register_tab') do
-    db = connect_to_db('db/tabdatabase.db')
     content = params[:content]
     title = params[:title]
     artist = params[:artist]
     time = Time.now
     created_on = time.inspect
     created_by = session[:user_id]
-    artist_id = db.execute("SELECT artist_id FROM Artist WHERE name = ?", artist)
-    if artist_id.empty?
-        db.execute("INSERT INTO Artist (name) VALUES (?)", artist)
-        artist_id = db.execute("SELECT artist_id FROM Artist WHERE name = ?", artist)
-    end
-    artist_id = (artist_id.first)["artist_id"]
-    db.execute("INSERT INTO Tab (content, title, artist_id, created_on, created_by) VALUES (?,?,?,?,?)", content, title, artist_id, created_on, created_by)
-    tab_id = db.execute("SELECT MAX(tab_id) AS this_tab FROM Tab")
-    db.execute("INSERT INTO tab_artist_relation (tab_id, artist_id) VALUES (?,?)", tab_id.first["this_tab"], artist_id)
+    artist_id = find_artist_id(artist)
+    tab_id = register_tab(content,title,artist_id,created_on,created_by).to_s
     # redirecta till taben som skapades
-    redirect('/')
+    redirect('/tabs/' + tab_id)
 end
 
 get('/logout') do
@@ -138,21 +131,19 @@ get('/settings') do
 end
 
 post('/delete') do
-    db = connect_to_db('db/tabdatabase.db')
-    db.execute("DELETE FROM User WHERE user_id = ?", session[:user_id])
+    user_id = session[:user_id]
+    delete_user(user_id)
     redirect('/logout')
 end
 
 post('/update') do
-    db = connect_to_db('db/tabdatabase.db')
     old_password = params[:old]
-    compare_password = db.execute("SELECT password FROM User WHERE user_id = ?", session[:user_id])
-    new_password = BCrypt::Password.create(params[:new])
-    if BCrypt::Password.new(compare_password.first["password"]) == old_password
-        db.execute("UPDATE User SET password=? WHERE user_id=?",new_password,session[:user_id])
+    user_id = session[:user_id]
+    session[:error] = update_user(old_password, user_id)
+    if session[:error].empty?
+        redirect('/settings')
     end
-    
-    redirect('/settings')
+    redirect('/error')
 end
 
 get('/error') do

@@ -1,8 +1,2 @@
 - Yardoc
-- MVC
-- REST
-- CRUD
-- Behörighetssystem
-- Många till många förhållande
 - Cooldown funktion
-- Finns skillnad på vad man kan göra som inloggad eller ej - maybe klar

@@ -1,2 +1,11 @@
-form action="/tabs/#{params['id']}" method="post"
-    input type="text" name="title" placeholder=""
+form action="/tabs/#{params['id']}/edited" method="post"
+    p Title  
+    input type="text" name="title" placeholder="#{result['title']}"
+    p Content
+    input type="text" name="content" placeholder="#{result['content']}"
+    br
+    br
+    input type="submit" value="Submit"
+    br
+    br
+    a href="/tabs/#{params['id']}" Cancel
